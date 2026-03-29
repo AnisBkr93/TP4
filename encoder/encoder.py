@@ -90,6 +90,15 @@ def exec_convert(input_file, output_file, from_encoding: str, to_encoding: str) 
         return subprocess.run(['pwsh', '-Command',
                                f'Get-Content "{input_file}" -Encoding {from_encoding} | Set-Content "{output_file}" -Encoding {to_encoding}'],
                               check=True)
+    elif sys.platform == 'darwin':
+        from_encoding = map_to_linux_encoding(from_encoding)
+        to_encoding = map_to_linux_encoding(to_encoding)
+        with open(output_file, 'wb') as out_f:
+            return subprocess.run(['iconv',
+                                   '-f', from_encoding,
+                                   '-t', to_encoding,
+                                   input_file],
+                                  stdout=out_f, check=True)
     else:
         from_encoding = map_to_linux_encoding(from_encoding)
         to_encoding = map_to_linux_encoding(to_encoding)
