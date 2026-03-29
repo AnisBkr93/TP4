@@ -41,6 +41,21 @@ def map_to_windows_encoding(encoding):
     else:
         raise ValueError(f"Unsupported encoding: {encoding}")
 
+def map_to_linux_encoding(encoding):
+    conversions = {
+        UTF8: 'UTF-8',
+        UTF16: 'UTF-16',
+        UTF32: 'UTF-32',
+        UTF16_LE: 'UTF-16LE',
+        UTF16_BE: 'UTF-16BE',
+        UTF32_LE: 'UTF-32LE',
+        UTF32_BE: 'UTF-32BE',
+    }
+
+    if encoding in conversions:
+        return conversions[encoding]
+    else:
+        raise ValueError(f"Unsupported encoding: {encoding}")
 
 def detect_bom(filepath):
     """Detect encoding from BOM (Byte Order Mark)"""
@@ -76,6 +91,8 @@ def exec_convert(input_file, output_file, from_encoding: str, to_encoding: str) 
                                f'Get-Content "{input_file}" -Encoding {from_encoding} | Set-Content "{output_file}" -Encoding {to_encoding}'],
                               check=True)
     else:
+        from_encoding = map_to_linux_encoding(from_encoding)
+        to_encoding = map_to_linux_encoding(to_encoding)
         return subprocess.run(['iconv',
                                '--from-code', from_encoding,
                                '--to-code', to_encoding,
